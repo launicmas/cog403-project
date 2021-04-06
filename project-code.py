@@ -15,8 +15,7 @@ SANDY = 6
 NUM_CORPUS = 7
 factors = ["subversion", "authority", "cheating", "fairness", "harm", "care", "betrayal", \
     "loyalty", "purity", "degradation", "non-moral"]
-labels = {ALM: 0, BALTIMORE: 2, BLM: 2, DAVIDSON: 0, ELECTION: 1, METOO: 2, SANDY: 1}
-#labels = {ALM: 0, BALTIMORE: 0.75, BLM: 1, DAVIDSON: 0.25, ELECTION: 0.5, METOO: 0.75, SANDY: 0.5}
+labels = {ALM: 0, BALTIMORE: 1, BLM: 1, DAVIDSON: 0, ELECTION: 0, METOO: 1, SANDY: 1}
 
 def get_data():
     f = open("./MFTC_V4.json", "r")
@@ -29,13 +28,11 @@ def get_data():
     metoo_X, metoo_Y = vectorize_tweets(data[METOO]["Tweets"], METOO)
     sandy_X, sandy_Y = vectorize_tweets(data[SANDY]["Tweets"], SANDY)
 
-    
-    #X = np.concatenate((alm_X, baltimore_X, blm_X, davidson_X, election_X, metoo_X, sandy_X), axis=0)
-    #Y = np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, election_Y, metoo_Y, sandy_Y))
     f.close()
 
     return alm_X, alm_Y, baltimore_X, baltimore_Y, blm_X, blm_Y, davidson_X, davidson_Y, \
         election_X, election_Y, metoo_X, metoo_Y, sandy_X, sandy_Y
+
 
 def vectorize_tweets(tweets: List[Dict], label: int):
     X = np.zeros((len(tweets), len(factors)))
@@ -105,7 +102,7 @@ if __name__ == "__main__":
             np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, metoo_Y)))
     print("Group 4 training accuracy: ", train_acc)
     print("Group 4 testing accuracy: ", test_acc)
-    print("Group 4 accuracy on all data: ", extended_acc)
+    print("Group 4 accuracy on all data except Elections and Hurricane Sandy: ", extended_acc)
 
 
     
