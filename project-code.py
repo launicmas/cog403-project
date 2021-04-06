@@ -54,7 +54,7 @@ def vectorize_tweets(tweets: List[Dict], label: int):
     return X, Y
 
 
-def run_log_regression(X, Y, all_X, all_Y):
+def run_log_regression(X, Y):
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
 
     # Find optimal parameters for logistic regression on dataset
@@ -63,7 +63,7 @@ def run_log_regression(X, Y, all_X, all_Y):
     clf = GridSearchCV(log_reg, parameters)
     clf.fit(X_train, Y_train)
 
-    return clf.score(X_train, Y_train), clf.score(X_test, Y_test), clf.score(all_X, all_Y)
+    return clf.score(X_train, Y_train), clf.score(X_test, Y_test)
 
 
 if __name__ == "__main__":
@@ -73,36 +73,42 @@ if __name__ == "__main__":
     # Group 1: All data
     all_X = np.concatenate((alm_X, baltimore_X, blm_X, davidson_X, election_X, metoo_X, sandy_X), axis=0)
     all_Y = np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, election_Y, metoo_Y, sandy_Y))
-    train_acc, test_acc, extended_acc = run_log_regression(all_X, all_Y, all_X, all_Y)
+    train_acc, test_acc = run_log_regression(all_X, all_Y)
     print("Group 1 training accuracy: ", train_acc)
     print("Group 1 testing accuracy: ", test_acc)
-    print("Group 1 accuracy on all data: ", extended_acc)
 
     # Group 2: ALM and BLM only, because we are most confident in those labels
     X = np.concatenate((alm_X, blm_X), axis=0)
     Y = np.concatenate((alm_Y, blm_Y))
-    train_acc, test_acc, extended_acc = run_log_regression(X, Y, all_X, all_Y)
+    train_acc, test_acc = run_log_regression(X, Y)
     print("Group 2 training accuracy: ", train_acc)
     print("Group 2 testing accuracy: ", test_acc)
-    print("Group 2 accuracy on all data: ", extended_acc)
 
     # Group 3: All data except Sandy and Elections, because we are least sure about those labels
     X = np.concatenate((alm_X, baltimore_X, blm_X, davidson_X, metoo_X), axis=0)
     Y = np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, metoo_Y))
-    train_acc, test_acc, extended_acc = run_log_regression(X, Y, all_X, all_Y)
+    train_acc, test_acc = run_log_regression(X, Y)
     print("Group 3 training accuracy: ", train_acc)
     print("Group 3 testing accuracy: ", test_acc)
-    print("Group 3 accuracy on all data: ", extended_acc)
 
-    # Group 4: Again ALM and BLM only, but apply the model to all data except Sandy and Elections
-    X = np.concatenate((alm_X, blm_X), axis=0)
-    Y = np.concatenate((alm_Y, blm_Y))
-    train_acc, test_acc, extended_acc = run_log_regression(X, Y, \
-        np.concatenate((alm_X, baltimore_X, blm_X, davidson_X, metoo_X), axis=0), \
-            np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, metoo_Y)))
-    print("Group 4 training accuracy: ", train_acc)
-    print("Group 4 testing accuracy: ", test_acc)
-    print("Group 4 accuracy on all data except Elections and Hurricane Sandy: ", extended_acc)
+    # Group 4: Permute Election and Sandy labels
+    sandy_0 = np.zeros(sandy_Y.shape)
+    election_1 = np.full(election_Y.shape, 1)
+
+    Y = np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, election_1, metoo_Y, sandy_Y))
+    train_acc, test_acc = run_log_regression(all_X, Y)
+    print("Group 4 training accuracy (E=1, S=1): ", train_acc)
+    print("Group 4 testing accuracy (E=1, S=1): ", test_acc)
+
+    Y = np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, election_Y, metoo_Y, sandy_0))
+    train_acc, test_acc = run_log_regression(all_X, Y)
+    print("Group 4 training accuracy (E=0, S=0): ", train_acc)
+    print("Group 4 testing accuracy (E=0, S=0): ", test_acc)
+
+    Y = np.concatenate((alm_Y, baltimore_Y, blm_Y, davidson_Y, election_1, metoo_Y, sandy_0))
+    train_acc, test_acc = run_log_regression(all_X, Y)
+    print("Group 4 training accuracy (E=1, S=0): ", train_acc)
+    print("Group 4 testing accuracy (E=1, S=0): ", test_acc)
 
 
     
