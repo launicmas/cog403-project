@@ -5,6 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GridSearchCV, train_test_split
 
+# Indices for MFTC data set
 ALM = 0
 BALTIMORE = 1
 BLM = 2
@@ -14,11 +15,17 @@ METOO = 5
 SANDY = 6
 
 NUM_CORPUS = 7
+
+# Annotated factors in MFTC data set
 factors = ["subversion", "authority", "cheating", "fairness", "harm", "care", "betrayal", \
     "loyalty", "purity", "degradation", "non-moral"]
+# Selected labels for corpuses
 labels = {ALM: 0, BALTIMORE: 1, BLM: 1, DAVIDSON: 0, ELECTION: 0, METOO: 1, SANDY: 1}
 
 def get_data():
+    """ Return vectorized tweets and target values for each corpus in the MFTC data set.
+    """
+
     f = open("./MFTC_V4.json", "r")
     data = json.load(f)
     alm_X, alm_Y = vectorize_tweets(data[ALM]["Tweets"], ALM)
@@ -36,6 +43,12 @@ def get_data():
 
 
 def vectorize_tweets(tweets: List[Dict], label: int):
+    """ Return a matrix of vectorized tweets and a matrix of label target values.
+
+    tweets - data from one MFTC corpus
+    label - the label that we assigned to the tweets corpus
+    """
+
     X = np.zeros((len(tweets), len(factors)))
     Y = np.full((len(tweets)), labels[label])
 
@@ -56,6 +69,13 @@ def vectorize_tweets(tweets: List[Dict], label: int):
 
 
 def run_log_regression(X, Y):
+    """ Fit a logistic regression model to training data from X and training labels from Y.
+    Return the model's training accuracy, testing accuracy, and confusion matrix.
+
+    X - input matrix
+    Y - labels corresponding to vectors in X
+    """
+
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
 
     # Find optimal parameters for logistic regression on dataset
